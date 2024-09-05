@@ -527,3 +527,5 @@ fabric.properties
 !.idea/runConfigurations
 
 # End of https://www.toptal.com/developers/gitignore/api/dotnetcore,angular,csharp,intellij+all
+
+appsettings.json
