@@ -1,5 +1,5 @@
-import { inject, Injectable, model, signal } from '@angular/core';
-import { HttpClient, HttpParams, HttpResponse } from "@angular/common/http";
+import { inject, Injectable, signal } from '@angular/core';
+import { HttpClient } from "@angular/common/http";
 import { environment } from "../../environments/environment";
 import { Member } from "../_models/member";
 import { Photo } from "../_models/photo";
@@ -7,6 +7,7 @@ import { PaginatedResult } from "../_models/pagination";
 import { UserParams } from "../_models/userParams";
 import { of } from "rxjs";
 import { AccountService } from "./account.service";
+import { setPaginatedResponse, setPaginationHeaders } from "./paginationHelper";
 
 @Injectable({
   providedIn: 'root'
@@ -27,9 +28,9 @@ export class MemberService {
   getMembers() {
     const response = this.memberCache.get(Object.values(this.userParams()).join('-'));
 
-    if (response) return this.setPaginatedResponse(response);
+    if (response) return setPaginatedResponse(response, this.paginatedResults);
 
-    let params = this.setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
+    let params = setPaginationHeaders(this.userParams().pageNumber, this.userParams().pageSize);
 
     params = params
       .append('minAge', this.userParams().mingAge)
@@ -39,29 +40,12 @@ export class MemberService {
 
     return this.http.get<Member[]>(this.baseUrl + 'users', { observe: 'response', params }).subscribe({
       next: response => {
-        this.setPaginatedResponse(response);
+        setPaginatedResponse(response, this.paginatedResults);
         this.memberCache.set(Object.values(this.userParams()).join('-'), response);
       }
     });
   }
 
-  private setPaginatedResponse(response: HttpResponse<Member[]>) {
-    this.paginatedResults.set({
-      items: response.body as Member[],
-      pagination: JSON.parse(response.headers.get('Pagination')!)
-    })
-  }
-
-  private setPaginationHeaders(pageNumber: number, pageSize: number) {
-    let params = new HttpParams();
-
-    if (pageNumber && pageSize) {
-      params = params.append('pageNumber', pageNumber);
-      params = params.append('pageSize', pageSize);
-    }
-
-    return params;
-  }
 
   getMember(username: string) {
     const member: Member = [...this.memberCache.values()]
