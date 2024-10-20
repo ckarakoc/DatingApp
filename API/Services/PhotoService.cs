@@ -32,6 +32,7 @@ public class PhotoService : IPhotoService
             };
             uploadResult = await _cloudinary.UploadAsync(uploadParams);
         }
+
         return uploadResult;
     }
 

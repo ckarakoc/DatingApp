@@ -24,7 +24,7 @@ public class ExceptionMiddleWare(RequestDelegate next, ILogger<ExceptionMiddleWa
 
             var options = new JsonSerializerOptions
             {
-                PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
+                PropertyNamingPolicy = JsonNamingPolicy.CamelCase
             };
             var json = JsonSerializer.Serialize(response, options);
             await context.Response.WriteAsync(json);

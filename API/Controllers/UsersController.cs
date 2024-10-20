@@ -14,7 +14,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
     : BaseApiController
 {
     [HttpGet] // /api/users
-    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery]UserParams userParams)
+    public async Task<ActionResult<IEnumerable<MemberDto>>> GetUsers([FromQuery] UserParams userParams)
     {
         userParams.CurrentUsername = User.GetUserName();
         var users = await userRepository.GetMembersAsync(userParams);
@@ -58,11 +58,8 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
             Url = result.SecureUrl.AbsoluteUri,
             PublicId = result.PublicId
         };
-        if (user.Photos.Count == 0)
-        {
-            photo.IsMain = true;
-        }
-        
+        if (user.Photos.Count == 0) photo.IsMain = true;
+
 
         user.Photos.Add(photo);
         if (await userRepository.SaveAllAsync())
@@ -80,17 +77,11 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
         if (photo == null || photo.IsMain) return BadRequest("Cannot set main photo");
 
         var currentMain = user.Photos.FirstOrDefault(x => x.IsMain);
-        if (currentMain != null)
-        {
-            currentMain.IsMain = false;
-        }
+        if (currentMain != null) currentMain.IsMain = false;
 
         photo.IsMain = true;
 
-        if (await userRepository.SaveAllAsync())
-        {
-            return NoContent();
-        }
+        if (await userRepository.SaveAllAsync()) return NoContent();
 
         return BadRequest("Failed to set main photo");
     }
@@ -109,7 +100,7 @@ public class UsersController(IUserRepository userRepository, IMapper mapper, IPh
             var result = await photoService.DeletePhotoAsync(photo.PublicId);
             if (result.Error != null) return BadRequest(result.Error.Message);
         }
-        
+
         user.Photos.Remove(photo);
 
         if (await userRepository.SaveAllAsync()) return Ok();

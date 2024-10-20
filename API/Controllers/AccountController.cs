@@ -16,18 +16,18 @@ public class AccountController(DataContext context, ITokenService tokenService, 
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
         if (await UserExist(registerDto.Username)) return BadRequest("Username is already taken");
-        
+
         using var hmac = new HMACSHA512();
-        
+
         var user = mapper.Map<AppUser>(registerDto);
 
         user.Username = registerDto.Username.ToLower();
         user.PasswordHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(registerDto.Password));
         user.PasswordSalt = hmac.Key;
-      
+
         context.Users.Add(user);
         await context.SaveChangesAsync();
-        
+
         return new UserDto
         {
             Username = user.Username,
@@ -47,10 +47,9 @@ public class AccountController(DataContext context, ITokenService tokenService, 
 
         using var hmac = new HMACSHA512(user.PasswordSalt);
         var computedHash = hmac.ComputeHash(Encoding.UTF8.GetBytes(loginDto.Password));
-        for (int i = 0; i < computedHash.Length; i++)
-        {
-            if (computedHash[i] != user.PasswordHash[i]) return Unauthorized("Invalid password");
-        }
+        for (var i = 0; i < computedHash.Length; i++)
+            if (computedHash[i] != user.PasswordHash[i])
+                return Unauthorized("Invalid password");
 
         return new UserDto
         {
