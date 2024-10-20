@@ -23,14 +23,15 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
         var sender = await userRepository.GetUserByUsernameAsync(username);
         var recipient = await userRepository.GetUserByUsernameAsync(createMessageDto.RecipientUsername);
 
-        if (recipient == null || sender == null) return BadRequest("Cannot send message at this time");
+        if (recipient == null || sender == null || sender.UserName == null || recipient.UserName == null)
+            return BadRequest("Cannot send message at this time");
 
         var message = new Message
         {
             Sender = sender,
             Recipient = recipient,
-            SenderUsername = sender.Username,
-            RecipientUsername = recipient.Username,
+            SenderUsername = sender.UserName,
+            RecipientUsername = recipient.UserName,
             Content = createMessageDto.Content
         };
 
@@ -69,12 +70,9 @@ public class MessagesController(IMessageRepository messageRepository, IUserRepos
 
         if (message.SenderUsername == username) message.SenderDeleted = true;
         if (message.RecipientUsername == username) message.RecipientDeleted = true;
-        if (message is {SenderDeleted: true, RecipientDeleted: true})
-        {
-            messageRepository.DeleteMessage(message);
-        }
+        if (message is {SenderDeleted: true, RecipientDeleted: true}) messageRepository.DeleteMessage(message);
 
         if (await messageRepository.SaveAllAsync()) return Ok();
         return BadRequest("Failed to delete message");
     }
-};
+}

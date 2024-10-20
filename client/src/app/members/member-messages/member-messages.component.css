@@ -17,3 +17,9 @@
 .rounded-circle {
   max-height: 50px;
 }
+
+.send-button {
+  border-radius: 0;
+  /*border-bottom-left-radius: 0;*/
+  /*border-top-left-radius: 0;*/
+}
