@@ -15,12 +15,6 @@ public class UserRepository(DataContext context, IMapper mapper) : IUserReposito
         context.Entry(user).State = EntityState.Modified;
     }
 
-    public async Task<bool> SaveAllAsync()
-    {
-        return await context
-            .SaveChangesAsync() > 0;
-    }
-
     public async Task<IEnumerable<AppUser>> GetUsersAsync()
     {
         return await context.Users
